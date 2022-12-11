@@ -110,7 +110,7 @@ void popMid(Stack *createNode){
             }
             curr = curr->up;
         }
-        if(curr == top) puts("DATA NOT FOUND"); return;
+        if(curr == top) printf("DATA NOT FOUND : %d\n", createNode->n); return;
         Stack *beforeCurr = curr->down;
         Stack *afterCurr = curr->up;
         curr->up = curr->down = NULL; // DELETE ARROW
@@ -124,6 +124,7 @@ void display(){
     if(top == NULL){
         puts("NO DATA");
     } else {
+        puts("NULL");
         Stack *curr = top;
         while(curr != NULL){
             printf(" %d\n", curr->n);
@@ -135,6 +136,7 @@ void display(){
 }
 
 int main(){
+    // INSERT
     puts("Display #1:");
     pushTop(createNode(6));
     pushTop(createNode(8));
@@ -144,10 +146,21 @@ int main(){
     pushMid(createNode(20));
     pushMid(createNode(12));
     pushMid(createNode(4));
+    pushMid(createNode(15));
+    pushTop(createNode(25));
+    pushBottom(createNode(1));
     display();
-    // puts("\nDisplay #2:");
-    // popBottom();
-    // popMid(createNode(4));
-    // display();
+
+    // DELETE
+    puts("\nDisplay #2:");
+    popBottom();
+    popMid(createNode(4));
+    popMid(createNode(5));
+    popMid(createNode(6));
+    popMid(createNode(25));
+    popMid(createNode(7));
+    popTop();
+    popBottom();
+    display();
     return 0;
 }
