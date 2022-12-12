@@ -173,20 +173,79 @@ bool search(const char *name){
 }
 
 // HASH TABLE
-const int SIZE = 10;
+const int SZ = 10;
 struct Customer{
-    char name;
+    char name[255];
     Customer *next;
-} *table[SIZE];
+}*headCust[SZ], *tailCust[SZ];
 
 Customer *createCustomer(const char *name){
     Customer *newCustomer = (Customer*) malloc(sizeof(Customer));
     strcpy(newCustomer->name, name);
-    node->next = NULL;
+    newCustomer->next = NULL;
+    return newCustomer;
 }
 
-Customer *insert(Customer *curr, Customer *node){
+unsigned long djb2(const char *str){
+    unsigned long key = 5381;
+    for(int i = 0; str[i] != '\0'; i++){
+        int ascii = int(str[i]);
+        key = ((key << 5) + key) + ascii;
+    }
+    return key % SZ;
+}
 
+void insertCustomer(Customer *createCustomer){
+    int idx = djb2(createCustomer->name);
+    if(headCust[idx] == NULL){
+        headCust[idx] = tailCust[idx] = createCustomer;
+    } else {
+        tailCust[idx]->next = createCustomer;
+        tailCust[idx] = createCustomer;
+    }
+}
+
+void traverseLL(int i){
+    Customer *curr = headCust[i];
+    while(curr){
+        printf("%s -> ", curr->name);
+        curr = curr->next;
+    }
+    puts("NULL");
+}
+
+void displayCustomer(){
+    for(int i = 0; i < SZ; i++){
+        printf("Index %d: ", i);
+        if(headCust[i]){
+            traverseLL(i);
+        } else {
+            puts("NO DATA");
+        }
+    }
+}
+
+void findInside(int i, const char *query, bool *found){
+    Customer *curr = headCust[i];
+    while(curr){
+        if(strcmp(curr->name, query) == 0){
+            printf("%s is Registered\n", query);
+            *found = true;
+            return;
+        }
+    }
+}
+
+void searchCustomer(const char *query){
+     bool found = false;
+    for(int i = 0; i < SZ; i++){
+        if(headCust[i]){
+            findInside(i, query, &found);
+            if(found == true) return;
+        } else {
+            continue;
+        }
+    }
 }
 
 // Main Prototype
@@ -336,16 +395,21 @@ void addCust(){
     do{
         strcpy(name, "");
         printf("Insert the customer's name [Without space]: ");
-        scanf("%[^\n]", name);
+        scanf("%[^\n]", name); getchar();
 
     }while(checkCust(name) == true);
+    insertCustomer(createCustomer(name));
     puts("Customer has been added!");
-    // Customer name DJB2 Hashing
     enter();
 }
 
 void searchCust(){
-
+    clear();
+    char nameSearch[255] = {};
+    printf("Insert the customer's name to be searched: ");
+    scanf("%[^\n]", nameSearch); getchar();
+    searchCustomer(nameSearch);
+    enter();
 }
 
 void viewWarteg(){
