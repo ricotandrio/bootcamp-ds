@@ -13,6 +13,12 @@ struct Dish{
     Dish *next, *prev;
 }*head = NULL, *tail = NULL;
 
+// g var
+char dishOrder[255][255]; 
+int dishOrderCount[255];
+int price[255] = {};
+int indexOrder;
+
 Dish* createDish(const char* name, int price, int quantity){
     Dish* newDish = (Dish*) malloc (sizeof(Dish));
     strcpy(newDish->name, name);
@@ -172,10 +178,30 @@ bool search(const char *name){
     }
 }
 
+bool searchOrder(const char *name){
+    if(head == NULL){
+        return false;
+    } else {
+        Dish *curr = head;
+        while(curr != NULL && strcmp(curr->name, name) != 0){
+            curr = curr->next;
+        }
+        if(curr == NULL){
+            return false;
+        } else {
+            price[indexOrder] += curr->price;
+            return true;
+        }
+    }
+}
+
+
 // HASH TABLE
 const int SZ = 10;
 struct Customer{
     char name[255];
+    char menu[SZ][255];
+    int count[SZ];
     Customer *next;
 }*headCust[SZ], *tailCust[SZ];
 
@@ -208,42 +234,59 @@ void insertCustomer(Customer *createCustomer){
 void traverseLL(int i){
     Customer *curr = headCust[i];
     while(curr){
-        printf("%s -> ", curr->name);
+        printf("%d. %s\n", i, curr->name);
         curr = curr->next;
     }
-    puts("NULL");
 }
 
 void displayCustomer(){
     for(int i = 0; i < SZ; i++){
-        printf("Index %d: ", i);
         if(headCust[i]){
             traverseLL(i);
-        } else {
-            puts("NO DATA");
-        }
+        } 
     }
 }
 
-void findInside(int i, const char *query, bool *found){
+bool findInside(int i, const char *query){
     Customer *curr = headCust[i];
     while(curr){
         if(strcmp(curr->name, query) == 0){
-            printf("%s is Registered\n", query);
-            *found = true;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool searchCustomer(const char *query){
+    for(int i = 0; i < SZ; i++){
+        if(headCust[i]){
+            if(findInside(i, query) == true) return true;
+        }
+    }
+    return false;
+}
+
+void findRemove(int i, const char *query, int *checker){
+    Customer *curr = headCust[i];
+    while(curr){
+        if(strcmp(curr->next->name, query) == 0){
+            Customer *beforeCurr = curr;
+            curr = curr->next;
+            Customer *afterCurr = curr;
+            beforeCurr->next = afterCurr;
+            free(curr);
+            *checker = 1;
             return;
         }
     }
 }
 
-void searchCustomer(const char *query){
-     bool found = false;
+void customerRemove(const char *query){
+    int checker = 0;
     for(int i = 0; i < SZ; i++){
         if(headCust[i]){
-            findInside(i, query, &found);
-            if(found == true) return;
-        } else {
-            continue;
+            findRemove(i, query, &checker);
+            if(checker == 1) return;
         }
     }
 }
@@ -262,6 +305,7 @@ void exitWarteg();
 // Validate Prototype
 bool checkLetter(const char* dishName);
 bool checkCust(char name[]);
+bool checkAvailable(const char *name);
 
 // Utilize
 void enter();
@@ -269,10 +313,13 @@ void clear();
 void addData(const char *name, int price, int quantity);
 void updateData();
 void readFile();
+void addCustomertoFile(const char *name);
+void readCustomerFile();
 
 int main(){
     int option;
     readFile();
+    readCustomerFile();
     do{
         clear();
         option = mainMenu();
@@ -344,8 +391,8 @@ void add(){
     char dishName[255];
     do{
         strcpy(dishName, "");
-        printf("Insert the name of the dish [Lowercase letters]: ");
-        scanf("%[^\n]", dishName); getchar();
+        printf("Insert the name of the dish [Lowercase letters, space is not allowed]: ");
+        scanf("%s", dishName); getchar();
     }while(checkLetter(dishName) == true);
 
     int price;
@@ -399,6 +446,7 @@ void addCust(){
 
     }while(checkCust(name) == true);
     insertCustomer(createCustomer(name));
+    addCustomertoFile(name);
     puts("Customer has been added!");
     enter();
 }
@@ -408,20 +456,61 @@ void searchCust(){
     char nameSearch[255] = {};
     printf("Insert the customer's name to be searched: ");
     scanf("%[^\n]", nameSearch); getchar();
-    searchCustomer(nameSearch);
+    bool found = searchCustomer(nameSearch);
+    if(found == true) printf("%s is registered\n", nameSearch);
+    else printf("%s is not registered\n", nameSearch);
     enter();
 }
 
 void viewWarteg(){
-
+    clear();
+    puts("Customer's List");
+    displayCustomer();
+    enter();
 }
 
 void order(){
+    indexOrder = 0;
+    clear();
+    char name[255] = {};
+    do{
+        printf("Insert the customer's name: ");
+        scanf("%[^\n]", name); getchar();
+    }while(checkAvailable(name) == true);
 
+    int n;
+    printf("Insert the amount of dish: ");
+    scanf("%d", &n); getchar();
+
+    for(int i = 0; i < n; i++){
+        int nominal;
+        char dishName[255] = {};
+        do{
+            printf("[%d] Insert the dish's name and quantity: ", i+1);
+            scanf("%s x%d", dishName, &nominal); getchar();
+        }while(searchOrder(dishName) == false);
+        
+        strcpy(dishName, dishOrder[indexOrder]);
+        
+        dishOrderCount[indexOrder++];
+    }
+    puts("Order success");
+    enter();
 }
 
 void payment(){
-
+    clear();
+    displayCustomer();
+    int n;
+    printf("Insert the customer's index: ");
+    scanf("%d", &n); getchar();
+    printf("%s\n", headCust[n]->name);
+    for(int i = 0; i < indexOrder; i++){
+        printf("[%d] %s\n", dishOrder, dishOrderCount);
+    }
+    printf("Total: Rp%d\n", price);
+    customerRemove(headCust[n]->name);
+    enter();
 }
 
 void exitWarteg(){
@@ -456,6 +545,15 @@ bool checkCust(char name[]){
         }
     }
     return false;
+}
+
+bool checkAvailable(const char *name){
+    bool check = searchCustomer(name);
+    if(check == true){
+        return false;
+    } else {
+        return true;
+    }
 }
 
 void enter(){
@@ -495,6 +593,23 @@ void readFile(){
         strcpy(name, "");
         fscanf(in, "%[^#]#%d#%d\n", name, &price, &quantity);
         pushTail(createDish(name, price, quantity));
+    }
+    fclose(in);
+}
+
+void addCustomertoFile(const char *name){
+    FILE *out = fopen("customer_list.txt", "a");
+    fprintf(out, "%s\n", name);
+    fclose(out);
+}
+
+void readCustomerFile(){
+    FILE *in = fopen("customer_list.txt", "r");
+    char name[255];
+    while(!feof(in)){
+        strcpy(name, "");
+        fscanf(in, "%[^\n]\n", name);
+        insertCustomer(createCustomer(name));
     }
     fclose(in);
 }

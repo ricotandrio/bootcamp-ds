@@ -1,4 +1,4 @@
-telur asin#2500#40
-tempe orek#13000#30
+telurasin#2500#40
+tempeorek#13000#30
 buncis#6000#1
-kembang tahu#11000#2
+kembangtahu#11000#2
