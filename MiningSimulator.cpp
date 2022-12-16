@@ -29,6 +29,7 @@ Node *insertNode(Node *root, int cave, int gold){
 }
 
 Node *searchNode(Node *root, int cave){
+    // if root is null then node is empty
     if(!root || root->cave == cave){
         return root;
     }
@@ -45,7 +46,6 @@ void display(Node *root, int depth){
         printf(">> Cave %03d  (depth %03d), total gold production: %d\n", root->cave, depth, root->gold);   
         display(root->left, depth+1);
         display(root->right, depth+1);
-        
     }
 }
 
