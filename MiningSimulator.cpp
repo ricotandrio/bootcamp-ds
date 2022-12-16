@@ -42,8 +42,8 @@ Node *searchNode(Node *root, int cave){
 
 void display(Node *root, int depth){
     if(root){
+        printf(">> Cave %03d  (depth %03d), total gold production: %d\n", root->cave, depth, root->gold);   
         display(root->left, depth+1);
-        printf(">> Cave %03d  (depth %03d), total gold production: %d\n", root->cave, depth, root->gold);      
         display(root->right, depth+1);
         
     }
