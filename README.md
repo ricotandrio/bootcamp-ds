@@ -1,2 +1,2 @@
-# MidExam-ProblemSet
+# midexam-problemset
 Bootcamp Mid Exam
