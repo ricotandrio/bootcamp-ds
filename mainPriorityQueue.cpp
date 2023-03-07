@@ -30,10 +30,7 @@ void enqueue(Queue *createNode){
     }
     else {
         Queue *curr = front;
-        while(curr->next != NULL){
-            if(curr->n >= createNode->n && curr->next->n < createNode->n){
-                break;
-            }
+        while(curr->next != NULL && !(curr->n >= createNode->n && curr->next->n < createNode->n)){
             curr = curr->next;
         }
         Queue *afterCurr = curr->next;
